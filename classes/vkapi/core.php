@@ -57,6 +57,8 @@ class Vkapi_Core {
 		try {
 			// Get the array of params here
 			$params = Arr::get($params, 0, array());
+            // Normalize the method name for vkontakte
+            $method = str_replace('_', '.', $method);
 			// URL for request
 			$url = $this->config->endpoint.$method;
 			// Adding access token to request params
