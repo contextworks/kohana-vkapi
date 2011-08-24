@@ -6,7 +6,4 @@
 return array(
 	'token' => 'someaccesstokenreceivedfromvkontakte',
 	'endpoint' => 'https://api.vkontakte.ru/method/',
-	'methods' => array(
-		'getProfiles',
-	),
 );
