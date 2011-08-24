@@ -29,8 +29,15 @@ class Vkapi_Core {
 		return self::$instances[$token];
 	}
 
+	/**
+	 * Instance configuration
+	 * @var \Kohana_Config_Group|object
+	 */
 	protected $config;
 
+	/**
+	 * @param string|null $token
+	 */
 	public function __construct($token = null)
 	{
 		$this->config = Kohana::$config->load('vkapi');
@@ -39,32 +46,28 @@ class Vkapi_Core {
 		}
 	}
 
+	/**
+	 * @throws Request_Exception|Vkapi_Exception
+	 * @param  $method
+	 * @param  $params
+	 * @return array
+	 */
 	public function __call($method, $params)
 	{
-		if (!array_key_exists($method, $this->config->methods)) {
-			throw new Vkapi_Exception(
-				'Unknown method requested: :method',
-				array(':method' => $method),
-				self::API_UNKNOWN_METHOD,
-			);
-		}
-
-		$url = $this->config->endpoint.$method;
-		$params['access_token'] = $this->config->token;
 		try {
+			// Get the array of params here
+			$params = Arr::get($params, 0, array());
+			// URL for request
+			$url = $this->config->endpoint.$method;
+			// Adding access token to request params
+			$params['access_token'] = $this->config->token;
+			// Requesting Vkontakte
 			$response = Request::factory($url)
 				->method(Request::GET)
 				->query($params)
 				->execute();
-
-			Kohana::$log->add(
-				Log::DEBUG,
-				'Request to :url provided the following response: :response',
-				array(':url' => $url, ':response' => $response->body())
-			);
-
-			$data = json_decode($response->body());
-
+			// Returning fetched data
+			return Vkapi_Response::factory($response->body())->get_data();
 		} catch (Request_Exception $e) {
 			// Log request exception
 			Kohana::$log->add(
